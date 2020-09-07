@@ -1,0 +1,83 @@
+﻿@model IEnumerable<MovieCustomerMvcApplicationWithAuthentication.Models.Movie>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>MovieL List</h2>
+@*@Html.ActionLink("New Movie", "New", "Movie", new { @class = "btn btn-primary" })*@
+@if (!Model.Any())
+{
+    <p>No Movies Found</p>
+}
+else
+{
+
+    <table id="movieTable"class="table table-bordered table-striped">
+
+        <thead>
+            <tr>
+                <th>Movie Name</th>
+                <th>Movie Genre</th>
+                <th>Movie Release Date</th>
+                <th>Movie Stock</th>
+
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var movie in Model)
+            {
+                <tr>
+
+
+
+                    <td>@Html.ActionLink(movie.Name, "Details", "Movie", new { id = movie.Id }, null)</td>
+
+                    <td>@movie.Genre.GenreName</td>
+                    <td>@movie.ReleaseDate</td>
+                    <td>@movie.Stock</td>
+                    @*<td>@Html.ActionLink("Edit", "Edit", new { id = movie.Id }, new { @class = "btn btn-success" })</td>
+
+                    <td>@Html.ActionLink("Delete with MVC", "Delete", new { id = movie.Id }, new { @class = "btn btn-danger" })</td>*@
+
+
+ <td>
+  @*<button data-movie-id="@movie.Id"  class="btn btn-danger js-delete">
+                            Delete
+                        </button>
+                    </td>*@
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+}
+
+
+
+
+@*@section scripts{
+
+    <script>
+        $(document).ready(function () {
+            $('#movieTable .js-delete').on('click', function () {
+           let btn = $(this)
+                if (confirm("Are you sure you want to delete this movie")) {
+                   $.ajax({
+                       url: '/api/movie/'+$(this).attr('data-movie-id'),
+                         method: 'DELETE',
+                    success: function () {
+                    btn.parents('tr').remove()
+                    }
+
+                    })
+                }
+
+            })
+})
+
+    </script>
+
+}*@
