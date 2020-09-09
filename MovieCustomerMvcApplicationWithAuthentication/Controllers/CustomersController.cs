@@ -7,6 +7,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Net.Http;
 using System.Web;
+using System.Web.Http;
 using System.Web.Mvc;
 
 namespace MovieCustomerMvcApplicationWithAuthentication.Controllers
@@ -25,9 +26,9 @@ namespace MovieCustomerMvcApplicationWithAuthentication.Controllers
         //    var customers = _context.Customers.Include(c => c.MembershipType).ToList();
         //    return View(customers);
         //}
-       
-        
-          public ActionResult Index()
+
+
+        public ActionResult Index()
 
         {
 
@@ -42,94 +43,145 @@ namespace MovieCustomerMvcApplicationWithAuthentication.Controllers
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         public ActionResult Details(int id)
         {
-            var singleCustomer = _context.Customers.Include(c => c.MembershipType).SingleOrDefault(c => c.Id == id);
-            if (singleCustomer == null)
-                return HttpNotFound();
-            return View(singleCustomer);
+            //Line no 49 - 52 iss displayimg singlr customer without web api
+            //var singleCustomer = _context.Customers.Include(c => c.MembershipType).SingleOrDefault(c => c.Id == id);
+            //if (singleCustomer == null)
+            //    return HttpNotFound();
+            //return View(singleCustomer);
+
+
+            //Below code is displaying single customer with WebApi
+            HttpResponseMessage response = GlobalVariables.webApiClient.GetAsync($"Customers/{id}").Result;
+            Customer singleCust;
+            singleCust = response.Content.ReadAsAsync<Customer>().Result;
+            return View(singleCust);
         }
 
 
         //Display Form
-        public ActionResult New()
-        {
 
-            var membershipTypes = _context.MembershipTypes.ToList();
+
+
+        public ActionResult New()
+
+        {             // var membershipTypes = _context.MembershipTypes.ToList();
+
+            HttpResponseMessage mresponse = GlobalVariables.webApiClient.GetAsync("Membershipapi").Result;
+
+            var membershipTypes = mresponse.Content.ReadAsAsync<IEnumerable<MembershipType>>().Result;
+
             var viewModel = new NewCustomerViewModel
+
             {
+
+                Customer = new Customer(),
+
                 MembershipTypes = membershipTypes
+
             };
-            return View(viewModel);
+
+            return View("New", viewModel);
+
         }
 
+
         //Save the form
-
-
-
-
-
-        [HttpPost]
-            [ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public ActionResult Save(Customer customer)
         {
+            //if (!ModelState.IsValid)
+            //{
+            //    var viewModel = new NewCustomerViewModel
+            //    {
+
+            //        Customer = customer,
+            //        MembershipTypes = _context.MembershipTypes.ToList()
+
+            //    };
+            //    return View("New", viewModel);
+            //}
+            //if (customer.Id == 0)
+            //    _context.Customers.Add(customer);
+
+            //else
+            //{
+            //   
+
+            HttpResponseMessage response = GlobalVariables.webApiClient.GetAsync("Membershipapi").Result;
+            var membershipTypes = response.Content.ReadAsAsync<IEnumerable<MembershipType>>().Result;
+            HttpResponseMessage cresponse = GlobalVariables.webApiClient.GetAsync("Customers").Result;
+
+
             if (!ModelState.IsValid)
             {
                 var viewModel = new NewCustomerViewModel
                 {
-
                     Customer = customer,
-                    MembershipTypes = _context.MembershipTypes.ToList()
-
+                    MembershipTypes = membershipTypes
                 };
                 return View("New", viewModel);
-            }
+            };
             if (customer.Id == 0)
-                _context.Customers.Add(customer);
-
+                cresponse = GlobalVariables.webApiClient.PostAsJsonAsync("Customers", customer).Result;
             else
             {
-                var customerInDb = _context.Customers.Single(c => c.Id == customer.Id);
-                customerInDb.Name = customer.Name;
-                customerInDb.Dob = customer.Dob;
-                customerInDb.MembershipTypeId = customer.MembershipTypeId;
-                customerInDb.IsSubscribedToNewsLetter = customer.IsSubscribedToNewsLetter;
+                cresponse = GlobalVariables.webApiClient.PutAsJsonAsync($"Customers/{customer.Id}", customer).Result;
             }
-            _context.SaveChanges();
-            return RedirectToAction("Index", "Customers");
+
+            return RedirectToAction("Index");
+            //        else {
+
+            //            var customerInDb = _context.Customers.Single(c => c.Id == customer.Id);
+            //            customerInDb.Name = customer.Name;
+            //            customerInDb.Dob = customer.Dob;
+            //            customerInDb.MembershipTypeId = customer.MembershipTypeId;
+            //            customerInDb.IsSubscribedToNewsLetter = customer.IsSubscribedToNewsLetter;
+            //        }
+            //_context.SaveChanges();
+            //    return RedirectToAction("Index", "Customers");
         }
 
-       public ActionResult Edit(int id)
-        {
-            var updateCust = _context.Customers.SingleOrDefault(c => c.Id == id);
-            if (updateCust == null)
-            {
-                return HttpNotFound();
-            }
 
+
+
+
+        public ActionResult Edit(int id)
+        {
+            HttpResponseMessage mResponse = GlobalVariables.webApiClient.GetAsync("Membershipapi").Result;
+            HttpResponseMessage cResponse = GlobalVariables.webApiClient.GetAsync($"Customers/{id}").Result;
             var vm = new NewCustomerViewModel
             {
-                Customer = updateCust,
-                MembershipTypes = _context.MembershipTypes.ToList()
+                Customer = cResponse.Content.ReadAsAsync<Customer>().Result,
+                MembershipTypes = mResponse.Content.ReadAsAsync<IEnumerable<MembershipType>>().Result
             };
-
             return View("New", vm);
         }
+
+        //    var updateCust = _context.Customers.SingleOrDefault(c => c.Id == id);
+        //    if (updateCust == null)
+        //    {
+        //        return HttpNotFound();
+        //    }
+
+        //    var vm = new NewCustomerViewModel
+        //    {
+        //        Customer = updateCust,
+        //        MembershipTypes = _context.MembershipTypes.ToList()
+        //    };
+
+        //   return View("New", vm);
+
+
+        //HttpResponseMessage response = GlobalVariables.webApiClient.PutAsJsonAsync("Customers", id).Result;
+
+
+        //return RedirectToAction("Index", "Customers");
+
+
+
+    
 
         public ActionResult Delete(int id)
         {
@@ -138,7 +190,6 @@ namespace MovieCustomerMvcApplicationWithAuthentication.Controllers
             _context.SaveChanges();
             return RedirectToAction("Index");
         }
-
 
 
 

@@ -54,9 +54,10 @@ namespace MovieCustomerMvcApplicationWithAuthentication
             //   consumerKey: "",
             //   consumerSecret: "");
 
-            //app.UseFacebookAuthentication(
-            //   appId: "",
-            //   appSecret: "");
+            app.UseFacebookAuthentication(
+               appId: "321228662420791",
+               appSecret: "346129c96b9efadb3656b58748da4127");
+
 
             //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
             //{

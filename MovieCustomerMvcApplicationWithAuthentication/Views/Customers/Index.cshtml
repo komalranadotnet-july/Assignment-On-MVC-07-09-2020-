@@ -36,7 +36,7 @@ else
                 
                @*<td>@customer.MembershipType</td>*@ 
                 <td>@customer.MembershipType.DiscountRate%</td>
-                <td>@customer.Dob</td>
+                <td>@customer.Dob.ToLongDateString()</td>
 
                 <td>@Html.ActionLink("Edit", "Edit", new { id = customer.Id }, new { @class = "btn btn-success" })</td>
 

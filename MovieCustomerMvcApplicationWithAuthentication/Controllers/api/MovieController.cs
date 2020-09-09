@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Data.Entity;
+using System.Web;
 
 namespace MovieCustomerMvcApplicationWithAuthentication.Controllers.api
 {
@@ -28,34 +29,45 @@ namespace MovieCustomerMvcApplicationWithAuthentication.Controllers.api
         }
 
 
-        public Movie GetMovie(int id)
+        public IHttpActionResult GetMovie(int id)
         {
-            var movie = _context.Movies.SingleOrDefault(c => c.Id == id);
+            if (id <= 0)
+                return BadRequest("Not a valid movie");
+            var movie = _context.Movies.Include(g => g.Genre).SingleOrDefault(c => c.Id == id);
             if (movie == null)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-            return movie;
+            {
+                return NotFound();
+            }
+            // throw new HttpResponseException(HttpStatusCode.NotFound);
+            return Ok(movie);
+
         }
 
         [HttpPost]
-        public Movie CreateMovie(Movie movie)
+        public IHttpActionResult CreateMovie(Movie movie)
         {
             if (!ModelState.IsValid)
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
+              return BadRequest("Model data is invalid");
+          //  throw new HttpResponseException(HttpStatusCode.BadRequest);
             _context.Movies.Add(movie);
             _context.SaveChanges();
-            return movie;
+            return Ok(movie);
         }
 
 
-       
+
         [HttpPut]
-        public void UpdateMovie(int id, Movie movie)
+        public IHttpActionResult UpdateMovie(int id, Movie movie)
         {
             if (!ModelState.IsValid)
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
+                return BadRequest("Invalid Data");
+
+           // throw new HttpResponseException(HttpStatusCode.BadRequest);
             var movieInDb = _context.Movies.SingleOrDefault(c => c.Id == id);
             if (movieInDb == null)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                return NotFound();
+
+            //  throw new HttpResponseException(HttpStatusCode.NotFound);
             movieInDb.Name = movie.Name;
             movieInDb.ReleaseDate = movie.ReleaseDate;
             movieInDb.Stock = movie.Stock;
@@ -63,17 +75,25 @@ namespace MovieCustomerMvcApplicationWithAuthentication.Controllers.api
             movieInDb.Genre = movie.Genre;
            
             _context.SaveChanges();
+            return Ok();
 
 
         }
         //DELETE /api/customers/1
-        public void DeleteMovie(int id)
+        public IHttpActionResult DeleteMovie(int id)
         {
+            if (id <= 0)
+                return BadRequest("Not a valid movie");
             var movieInDb = _context.Movies.SingleOrDefault(c => c.Id == id);
             if (movieInDb == null)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                return NotFound();
+
+            //throw new HttpResponseException(HttpStatusCode.NotFound);
             _context.Movies.Remove(movieInDb);
             _context.SaveChanges();
+            return Ok();
+
+
         }
 
     }

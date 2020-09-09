@@ -25,50 +25,68 @@ namespace MovieCustomerMvcApplicationWithAuthentication.Controllers.api
         }
 
 
-        public Customer GetCustomer(int id)
+        public IHttpActionResult GetCustomer(int id)
         {
-            var customer = _context.Customers.SingleOrDefault(c => c.Id == id);
+
+            if (id <= 0)
+                return BadRequest("Not a valid customer id");
+
+            var customer = _context.Customers.Include(c => c.MembershipType).SingleOrDefault(c => c.Id == id);
             if (customer == null)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-            return customer;
+            {
+                return NotFound();
+                //throw new HttpResponseException(HttpStatusCode.NotFound);
+
+            }
+            return Ok(customer);
         }
+
+
         //POST /api/customers
         [HttpPost]
-        public Customer CreateCustomer(Customer customer)
+        public IHttpActionResult CreateCustomer(Customer customer)
         {
             if (!ModelState.IsValid)
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
+                return BadRequest("Model data is invalid");
+                //throw new HttpResponseException(HttpStatusCode.BadRequest);
             _context.Customers.Add(customer);
             _context.SaveChanges();
-            return customer;
+            return Ok(customer);
         }
 
 
         //PUT /api/customers/1
         [HttpPut]
-        public void UpdateCustomer(int id, Customer customer)
+        public IHttpActionResult UpdateCustomer(int id, Customer customer)
         {
             if (!ModelState.IsValid)
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
+                return BadRequest("Invalid Data");
+               // throw new HttpResponseException(HttpStatusCode.BadRequest);
             var customerInDb = _context.Customers.SingleOrDefault(c => c.Id == id);
             if (customerInDb == null)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                return NotFound();
+                //throw new HttpResponseException(HttpStatusCode.NotFound);
             customerInDb.Name = customer.Name;
             customerInDb.Dob = customer.Dob;
             customerInDb.MembershipTypeId = customer.MembershipTypeId;
             customerInDb.IsSubscribedToNewsLetter = customer.IsSubscribedToNewsLetter;
             _context.SaveChanges();
-
+            return Ok();
 
         }
         //DELETE /api/customers/1
-        public void DeleteCustomer(int id)
+        public  IHttpActionResult DeleteCustomer(int id)
         {
+            if (id <= 0)
+                return BadRequest("Not a valid customer id");
             var customerInDb = _context.Customers.SingleOrDefault(c => c.Id == id);
+
             if (customerInDb == null)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                return NotFound();
+            //    throw new HttpResponseException(HttpStatusCode.NotFound);
             _context.Customers.Remove(customerInDb);
             _context.SaveChanges();
+            return Ok();
         }
 
     }

@@ -5,8 +5,15 @@ namespace MovieCustomerMvcApplicationWithAuthentication.Models
 {
     public class ExternalLoginConfirmationViewModel
     {
+
+        [Required]
+        [StringLength(255)]
+        public string DrivingLicense { get; set; }
+
+
         [Required]
         [Display(Name = "Email")]
+      
         public string Email { get; set; }
     }
 
@@ -64,6 +71,9 @@ namespace MovieCustomerMvcApplicationWithAuthentication.Models
 
     public class RegisterViewModel
     {
+        [Required]
+        [StringLength(255)]
+        public string DrivingLicense { get; set; }
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]

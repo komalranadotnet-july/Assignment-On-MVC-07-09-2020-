@@ -9,6 +9,9 @@
 
 
 <div>
+    <p>@Model.Name</p>
+    <p>@Model.ReleaseDate</p>
+    <p>@Model.Stock</p>
     <h2>@Model.Genre.GenreName</h2>
 
     @Html.ActionLink("Back", "Index", "Movie", new { @class = "btn btn-primary" })
